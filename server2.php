@@ -1,6 +1,6 @@
 <?php
 set_time_limit(0);
-error_reporting(0);
+// error_reporting(0);
 
 // buat koneksi socket untuk stream dengan tcp
 if(!$sock = socket_create(AF_INET, SOCK_STREAM, SOL_TCP)){
@@ -157,19 +157,38 @@ function encodeMsg($msg){
 
 // cek terus pesan yang masuk dari client
 while(true){
+    echo socket_accept($sock);
+
     $buf = socket_recv($client, $read, 5000000, 0);
 
-    if($read != null){
-        $msg = decodeMsg($read);
-        echo "\nClient: " . $msg;
+    // spesifikasikan jika pesan yang dikirim adalah dari server atau client
+    $bufCek = array_map('ord', str_split($read));
+    if($bufCek[0] == 64 && $bufCek[1] == 33){ /* 64 dan 33 adalah kode dari server untuk menandakan pesan bahwa itu dari server @!*/
+        if($read != null){
+            array_shift($bufCek);
+            array_shift($bufCek);
 
-        $buf = encodeMsg("Server: kamu mengirimkan pesan " . $msg);
+            $msg = implode(array_map('chr', $bufCek));
 
-        socket_write($client, $buf, strlen($buf));
+            echo "\nClient: " . $msg;
+
+            $buf = "Server: " . $msg;
+
+            socket_write($client, $buf, strlen($buf));
+        }
     }
-
-    else if($read == null){
+    else if($read == null){ /*cek jika client telah disconnected*/
         echo "\n$addr:$port disconnected";
         break;
+    }
+    else { /*cek jika pesan yang dikirim adlah dari browser*/
+        if($read != null){
+            $msg = decodeMsg($read);
+            echo "\nClient: " . $msg;
+
+            $buf = encodeMsg("Server: kamu mengirimkan pesan " . $msg);
+
+            socket_write($client, $buf, strlen($buf));
+        }
     }
 }

@@ -8,7 +8,7 @@ ws.onopen = function(open) {
 
 ws.onmessage = function(message) {
     console.log(message);
-    document.write("", message.data);
+    document.write("<br>" + message.data);
 };
 
 ws.onerror = function(error){

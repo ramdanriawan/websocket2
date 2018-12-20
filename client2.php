@@ -111,3 +111,8 @@ socket_write($sock, $msg, strlen($msg));
 
 $response = socket_read($sock, 5000000);
 echo "\r\nserver: " . $response . "\r\n";
+
+$msg = '@!kampret';
+socket_write($sock, $msg, strlen($msg));
+$response = socket_read($sock, 5000000);
+echo "\r\n" . $response . "\r\n";
